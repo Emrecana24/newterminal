@@ -1,0 +1,45 @@
+# CODESPACE TERMINAL — GELİŞTİRME VE DEVAM PROMPTU
+
+Bu proje; GitHub Codespaces ortamını bir Android telefondan (özellikle Samsung Galaxy A8 / Android 8 / minSdk 24) canlı Bash terminali, Gemini AI terminal ajanı ve uzaktan Dosya Gezgini olarak yönetmeyi sağlayan açık kaynaklı bir sistemdir.
+
+## Projenin Mimari Özellikleri ve Öğrenilen Kurallar:
+1. **İki Parçalı Yapı:**
+   - `server/`: Node.js, `node-pty` ve `ws` (WebSocket) tabanlı PTY sunucusu. Port 8080 üzerinde çalışır ve `.token` ile korunur.
+   - `android/`: Android WebView tabanlı istemci. Xterm.js ile terminali işler, `MainActivity.java` içerisindeki `AndroidBridge` köprüsünü kullanır.
+2. **Sunucu API Rotaları:**
+   - `/api/ping`: Bağlantı testi.
+   - `/api/list`: Dizin listeleme (varsayılan: `/workspaces/newterminal`).
+   - `/api/read`: Dosyaları metin okuyucusunda açmak için düz metin okuma.
+   - `/api/download`: Dosyaları veya klasörleri (.tar.gz olarak) indirme.
+   - `/api/exec`: AI araç çağrıları için komut koşturma.
+3. **Canlı Bölünmüş Ekran (Split Screen):**
+   - AI sekmesinde ekran ikiye bölünür: Üstte canlı terminal (yüksekliği bölücü çizgiyle parmakla ayarlanabilir), altta AI sohbeti.
+   - Terminal ile AI sekmesindeki kabuk aynı oturumu (`sid` ve `replay`) paylaşır.
+   - Terminal kutusu `overflow: hidden !important` ile izole edilmiştir, AI sohbeti üzerine taşmaz.
+4. **Gemini AI Ajanı:**
+   - Modeller: `gemini-3.5-flash-lite` (varsayılan), `gemini-3.6-flash`, `gemini-3.8-flash`.
+   - API Anahtarı: Google AI Studio'nun yeni `AQ.` formatındaki Auth anahtarlarını hem `?key=` hem `x-goog-api-key` başlığıyla destekler.
+   - Function Calling: `exec_command` aracıyla bash komutlarını canlı terminalde çalıştırır, çıktıyı terminale döker ve sonucu okuyup özetler.
+   - KRİTİK: Gemini REST API protokolünde araç cevabı (`functionResponse`) rolü 'function' değil, kesinlikle 'user' olmak zorundadır.
+   - Güvenlik: Normal bilgi komutları otomatik çalışır; `rm -rf`, `sudo`, `dd`, `mkfs`, `git push --force` gibi kritik komutlarda kart üzerinden onay ister.
+5. **Dosya Gezgini:**
+   - Doğrudan indirme yapmaz, yalnızca buluttan isimleri çeker.
+   - Klasöre normal tıklama içine girer.
+   - Dosyaya/klasöre uzun basma alt menüyü açar: "Metin Olarak Oku (Txt Okuyucu)", "İndir", "Yolu Kopyala".
+   - Dahili Txt Okuyucu penceresinde "Tüm Metni Kopyala" butonu bulunur.
+6. **Android 8 (Galaxy A8) ve Derleme:**
+   - AGP 8.2 altında `build.gradle` içinde `lint { abortOnError false; checkReleaseBuilds false }` tanımlıdır.
+   - Derleme `./gradlew :app:assembleRelease --no-daemon` ile yapılır (-x lint bayrağı olmadan).
+   - Derlenen APK GitHub Releases (v2.0) sayfasına yüklenir.
+
+---
+
+## İLK GÖREVİN:
+Kullanıcı sıfırdan bir Codespace açtı ve ana dizine `terminal-update.zip` arşivini yükledi.
+Kullanıcıya projeyi anlatmakla vakit kaybetme; doğrudan yukarıdaki tüm kuralları ve test edilmiş deneyimlerimizi içeren, aşağıdaki adımları tek hamlede eksiksiz yapan **TEK BİR TERMİNAL KOMUTU** ver:
+
+1. Ana dizindeki `terminal-update.zip` arşivini açıp zip dosyasını silen,
+2. Sunucuyu (`bash server/kur.sh` veya `bash server/start.sh`) başlatan ve port 8080'i `gh codespace ports visibility 8080:public -c "$CODESPACE_NAME"` ile Public yapan,
+3. Gerekli kütüphaneleri (xterm 5.3.0) ve derleme araçlarını (Java 17, Android SDK API 34) yapılandıran,
+4. APK'yı derleyip ana dizine `CodespaceTerminal.apk` olarak kaydeden ve GitHub Releases sayfasına yükleyen,
+5. Çıktının tamamını baştan `derleme_cikti.txt` dosyasına yazdıran (`2>&1 | tee derleme_cikti.txt`) komutu sun.
