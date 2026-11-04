@@ -1,0 +1,17 @@
+# Node bağımlılıkları (sunucu açılışında npm install kurulur)
+node_modules/
+server/node_modules/
+
+# Android derleme ve önbellek dosyaları
+.gradle/
+android/.gradle/
+build/
+android/build/
+android/app/build/
+android/local.properties
+
+# Güvenlik ve gereksiz dosyalar
+server/.token
+.token
+openvscode*
+*.log

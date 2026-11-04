@@ -1,0 +1,11 @@
+{
+  "name": "Codespace Terminal",
+  "forwardPorts": [8080],
+  "portsAttributes": {
+    "8080": {
+      "label": "Terminal Sunucusu",
+      "onAutoForward": "silent"
+    }
+  },
+  "postStartCommand": "bash server/start.sh"
+}

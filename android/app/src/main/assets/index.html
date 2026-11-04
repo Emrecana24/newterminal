@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#161b22">
+  <title>Codespace Terminal</title>
+  <link rel="stylesheet" href="xterm.css">
+  <link rel="stylesheet" href="app.css">
+  <script src="xterm.js"></script>
+  <script src="xterm-addon-fit.js"></script>
+</head>
+<body data-tab="terminal">
+  <div id="app">
+    <header id="topbar">
+      <nav id="tabs">
+        <i id="tab-pill"></i>
+        <button class="tab rp active" data-tab="terminal"><span class="ti">&gt;_</span><span class="tl">Terminal</span></button>
+        <button class="tab rp" data-tab="ai"><span class="ti">&#10022;</span><span class="tl">AI</span></button>
+        <button class="tab rp" data-tab="files"><span class="ti">&#9636;</span><span class="tl">Dosya</span></button>
+      </nav>
+      <button id="conn-chip" class="chip rp"><i id="status-dot"></i><span id="conn-text">Kurulum</span></button>
+      <button id="btn-settings" class="icon-btn rp" aria-label="Ayarlar">&#9881;</button>
+    </header>
+
+    <main id="main">
+      <section id="term-pane"><div id="terminal-view"></div></section>
+      <div id="splitter"><span></span></div>
+
+      <section id="ai-pane">
+        <div id="ai-head">
+          <select id="ai-model"></select>
+          <button id="btn-ai-clear" class="mini rp">Hafızayı sıfırla</button>
+        </div>
+        <div id="ai-messages"></div>
+        <div id="ai-input-bar">
+          <textarea id="ai-input" rows="1" placeholder="Ne yapmamı istersin?" enterkeyhint="send" autocomplete="off" autocorrect="off" spellcheck="false"></textarea>
+          <button id="btn-ai-send" class="send rp" aria-label="Gönder">&#10148;</button>
+        </div>
+      </section>
+
+      <section id="files-pane">
+        <div id="path-bar">
+          <button id="f-up" class="icon-btn rp" aria-label="Üst dizin">&#11014;</button>
+          <div id="current-path"></div>
+          <button id="f-hidden" class="icon-btn rp" aria-label="Gizli dosyalar">.*</button>
+          <button id="f-refresh" class="icon-btn rp" aria-label="Yenile">&#10227;</button>
+        </div>
+        <div id="f-filter-wrap"><input id="f-filter" type="search" placeholder="Filtrele..." autocomplete="off" autocapitalize="none" spellcheck="false"></div>
+        <div id="file-list"></div>
+      </section>
+
+      <div id="keybar">
+        <button class="key kfixed rp" data-act="kbd" aria-label="Klavyeyi aç/kapat">&#9000;</button>
+        <div id="keys">
+          <button class="key rp" data-seq="esc">ESC</button>
+          <button class="key rp" data-seq="tab">TAB</button>
+          <button class="key mod rp" data-mod="ctrl">CTRL</button>
+          <button class="key mod rp" data-mod="alt">ALT</button>
+          <button class="key rp" data-seq="c-c">^C</button>
+          <button class="key rp rep" data-seq="left">&#9664;</button>
+          <button class="key rp rep" data-seq="down">&#9660;</button>
+          <button class="key rp rep" data-seq="up">&#9650;</button>
+          <button class="key rp rep" data-seq="right">&#9654;</button>
+          <button class="key rp" data-ch="|">|</button>
+          <button class="key rp" data-ch="/">/</button>
+          <button class="key rp" data-ch="-">-</button>
+          <button class="key rp" data-ch="~">~</button>
+          <button class="key rp" data-ch="\">\</button>
+          <button class="key rp" data-seq="home">HOME</button>
+          <button class="key rp" data-seq="end">END</button>
+          <button class="key rp rep" data-seq="pgup">PGUP</button>
+          <button class="key rp rep" data-seq="pgdn">PGDN</button>
+          <button class="key rp" data-seq="c-d">^D</button>
+          <button class="key rp" data-seq="c-z">^Z</button>
+          <button class="key rp" data-seq="c-l">^L</button>
+          <button class="key act rp" data-act="paste">YAPIŞTIR</button>
+          <button class="key act rp" data-act="text">METİN</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Dosya işlem menüsü -->
+  <div id="sheet" class="overlay">
+    <div class="sheet">
+      <div class="grab"></div>
+      <div id="sheet-title"></div>
+      <div id="sheet-sub"></div>
+      <div id="sheet-actions"></div>
+    </div>
+  </div>
+
+  <!-- Dosya okuyucu / terminal metni -->
+  <div id="reader" class="page">
+    <div class="page-head">
+      <span id="reader-title"></span>
+      <button id="reader-copy" class="mini rp">Kopyala</button>
+      <button id="reader-close" class="mini primary rp">Kapat</button>
+    </div>
+    <pre id="reader-content" class="sel"></pre>
+    <div id="reader-note"></div>
+  </div>
+
+  <!-- Ayarlar -->
+  <div id="settings" class="page">
+    <div class="page-head">
+      <span>Ayarlar</span>
+      <button id="btn-close-settings" class="mini rp">Kapat</button>
+    </div>
+    <div class="s-body">
+      <div class="s-card">
+        <h4>Codespace bağlantısı</h4>
+        <label for="in-url">Sunucu adresi</label>
+        <input id="in-url" type="url" placeholder="https://...-8080.app.github.dev" autocomplete="off" autocapitalize="none" spellcheck="false">
+        <label for="in-token">Erişim anahtarı</label>
+        <div class="pw"><input id="in-token" type="password" placeholder="Codespace'te gösterilen anahtar" autocomplete="off" autocapitalize="none" spellcheck="false"><button class="eye rp" data-eye="in-token">göster</button></div>
+        <p class="hint">Codespace terminalinde <code>bash server/bilgi.sh</code> yaz; adres ve anahtarı gösterir.</p>
+        <div class="row">
+          <button id="btn-test" class="btn rp">Bağlantıyı test et</button>
+          <button id="btn-newsession" class="btn ghost rp">Yeni oturum</button>
+        </div>
+        <div id="test-result" class="hint"></div>
+      </div>
+
+      <div class="s-card">
+        <h4>Yapay zekâ (Gemini)</h4>
+        <label for="in-key">API anahtarı</label>
+        <div class="pw"><input id="in-key" type="password" placeholder="Gemini API anahtarı" autocomplete="off" autocapitalize="none" spellcheck="false"><button class="eye rp" data-eye="in-key">göster</button></div>
+        <label for="in-custom">Özel model kimliği (isteğe bağlı)</label>
+        <input id="in-custom" type="text" placeholder="AI sekmesinde 'Özel model' seçilirse kullanılır" autocomplete="off" autocapitalize="none" spellcheck="false">
+        <div class="switch-row">
+          <div><b>Tehlikeli komutlarda onay iste</b><div class="hint">rm -rf, sudo, git push --force vb. çalışmadan önce sorulur</div></div>
+          <label class="switch"><input type="checkbox" id="sw-confirm"><span></span></label>
+        </div>
+      </div>
+
+      <div class="s-card">
+        <h4>Görünüm</h4>
+        <div class="switch-row">
+          <div><b>Yazı boyutu</b><div class="hint">Terminalde iki parmakla yakınlaştırarak da değişir</div></div>
+          <div class="stepper"><button id="font-minus" class="rp">&minus;</button><span id="font-label">8px</span><button id="font-plus" class="rp">+</button></div>
+        </div>
+        <div class="switch-row">
+          <div><b>Ekranı açık tut</b></div>
+          <label class="switch"><input type="checkbox" id="sw-awake"><span></span></label>
+        </div>
+      </div>
+    </div>
+    <div class="page-foot">
+      <button id="btn-save" class="btn primary rp">Kaydet ve bağlan</button>
+    </div>
+  </div>
+
+  <div id="toasts"></div>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+<resources>
+    <!-- Fullscreen TEMA YOK: adjustResize ancak böyle çalışır, klavye ekranı kapatmaz -->
+    <style name="AppTheme" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/bg</item>
+        <item name="android:statusBarColor">@color/bg_bar</item>
+        <item name="android:navigationBarColor">@color/bg_bar</item>
+    </style>
+</resources>
